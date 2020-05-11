@@ -7,4 +7,7 @@ class ExpeditionsRepository(ABC,object): #pragma: no cover
     async def get_all(self, filters): pass
 
     @abstractmethod
+    async def get_total(self, filters): pass
+
+    @abstractmethod
     async def get_by_id(self, id): pass

@@ -69,7 +69,7 @@ class RequestSanicDict(Request):
 
 class RequestCurlTo:
     @staticmethod
-    def curl_post(url, headers, data):
+    async def curl_post(url, headers, data):
         r = requests.post(
             url,
             headers=headers,
@@ -79,7 +79,7 @@ class RequestCurlTo:
         return json.loads(r.text)
 
     @staticmethod
-    def curl(url, headers):
+    async def curl(url, headers):
         r = requests.get(
             url,
             headers=headers,

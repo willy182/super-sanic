@@ -8,7 +8,7 @@ class HttpRequest:
     def __init__(self):
         self.__http_request_handler = pybreaker.CircuitBreaker(fail_max=5, reset_timeout=3)
 
-    def do_get_request(self, url, data=None, header=None):
+    async def do_get_request(self, url, data=None, header=None):
         response = self.__http_request_handler.call_async(
             RequestCurlTo.curl,
             url,
@@ -17,7 +17,7 @@ class HttpRequest:
 
         return response
 
-    def do_post_request(self, url, data=None, header=None):
+    async def do_post_request(self, url, data=None, header=None):
         response = self.__http_request_handler.call_async(
             RequestCurlTo.curl_post,
             url,
@@ -27,6 +27,6 @@ class HttpRequest:
 
         return response
 
-    def get_circuit_breaker(self):
+    async def get_circuit_breaker(self):
 
         return self.__http_request_handler

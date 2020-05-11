@@ -19,7 +19,7 @@ class PlanktonV4Repository(PlanktonRepository):
 
         url = '{}/v4{}'.format(self.__url, uri)
 
-        response = self.__http_client.do_get_request(
+        response = await self.__http_client.do_get_request(
             url=url,
             header=plankton_header
         )
