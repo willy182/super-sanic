@@ -4,12 +4,12 @@ from sanic.log import logger
 
 
 class UseCase(object):
-    def execute(self, request_object):
+    async def execute(self, request_object):
 
         if not request_object:
             return ro.ResponseFailure.build_from_invalid_request_object(request_object)
         try:
-            return self.process_request(request_object)
+            return await self.process_request(request_object)
 
         except Exception as exc:
 

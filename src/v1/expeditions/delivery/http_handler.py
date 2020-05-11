@@ -6,7 +6,7 @@ from helpers.validator.validator_jsonschema import JSONSchemaValidator
 from src.shared.repository import Repository
 from src.shared.request.http_request import HttpRequest
 from src.shared.request.request_sanic import RequestSanicDict
-from src.shared.response.json import Json
+# from src.shared.response.json import Json
 from src.v1.area.repository.repository_postgres import AreaRepositoryPSQL
 from src.v1.expeditions.repository.repository_postgres import ExpeditionsRepositoryPSQL
 from src.v1.expeditions.usecase.request_object_expedtions import ListAreaRequestObject
@@ -37,6 +37,6 @@ async def index(request):
     repo_init = _init_repo(request.app.db)
     use_cases = ListExpeditionUsecase(repo=repo_init)
     request_object = ListAreaRequestObject.from_dict(adict, validator=validator)
-    response_object = use_cases.execute(request_object)
+    response_object = await use_cases.execute(request_object)
 
     return json(response_object.value, status=Config.STATUS_CODES[response_object.type])

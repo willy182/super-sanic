@@ -12,11 +12,11 @@ class ListExpeditionUsecase(uc.UseCase):
     def __init__(self, repo):
         self.repo = repo
 
-    def process_request(self, request_objects):
+    async def process_request(self, request_objects):
         try:
-            data_expedition = asyncio.create_task(self.repo.expedition.get_all(request_objects))
-            data_area = asyncio.create_task(self.repo.area.get_subdistrict_by_zipcode(17111))
-            data_plankton = asyncio.create_task(self.repo.plankton.get_variant('/variants?filter[skuNo]=3316920142'))
+            data_expedition = await asyncio.create_task(self.repo.expedition.get_all(request_objects))
+            data_area = await asyncio.create_task(self.repo.area.get_subdistrict_by_zipcode(17111))
+            data_plankton = await asyncio.create_task(self.repo.plankton.get_variant('/variants?filter[skuNo]=3316920142'))
 
             # await data_expedition
             # await data_area

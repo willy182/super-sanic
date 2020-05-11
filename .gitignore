@@ -1,3 +1,6 @@
 virtualenv
 .idea/
 .env
+venv
+# python
+*__pycache__*
