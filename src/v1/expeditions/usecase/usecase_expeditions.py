@@ -23,15 +23,14 @@ class ListExpeditionUsecase(uc.UseCase):
             # await data_expedition
             # await data_area
             # await data_plankton
-
             serializer = ExpeditionBaseSchema().dump(data_expedition, many=True)
-
-            for data in serializer:
-                data['subDistrict'] = data_area
-                data['plankton'] = data_plankton
-
+            # for data in serializer:
+                # di serialize dulu wak
+                # data['subDistrict'] = data_area
+                # data['plankton'] = data_plankton
             return ro.ResponseSuccess(serializer)
 
         except Exception as e:
+            print(e, "got an error")
             return CommonResponse.build_common_message(str(e), Config.SYSTEM_ERROR)
 
