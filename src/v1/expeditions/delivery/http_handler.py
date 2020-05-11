@@ -1,4 +1,5 @@
 from sanic import Blueprint
+from sanic.response import json
 
 from configs.config import Config
 from helpers.validator.validator_jsonschema import JSONSchemaValidator
@@ -37,6 +38,5 @@ async def index(request):
     use_cases = ListExpeditionUsecase(repo=repo_init)
     request_object = ListAreaRequestObject.from_dict(adict, validator=validator)
     response_object = use_cases.execute(request_object)
-    print(response_object.__dict__)
 
-    return Json(properties=response_object.value, code=Config.STATUS_CODES[response_object.type])
+    return json(response_object.value, status=Config.STATUS_CODES[response_object.type])

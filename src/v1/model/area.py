@@ -1,6 +1,5 @@
 import sqlalchemy
 
-
 metadata = sqlalchemy.MetaData()
 
 subdistrict = sqlalchemy.Table(
@@ -16,8 +15,8 @@ subdistrict_zipcode = sqlalchemy.Table(
     'bc_subdistrict_zipcode',
     metadata,
     sqlalchemy.Column('id', sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column('subdistrict_id', sqlalchemy.Integer),
-    sqlalchemy.Column('zipcode', sqlalchemy.Integer),
+    sqlalchemy.Column('subdistrict_id', sqlalchemy.Integer, sqlalchemy.ForeignKey('bc_subdistrict.id')),
+    sqlalchemy.Column('zip_code', sqlalchemy.Integer),
     sqlalchemy.Column('zipcode_id', sqlalchemy.Integer),
 )
 
