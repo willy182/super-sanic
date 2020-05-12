@@ -7,6 +7,8 @@ class ListAreaRequestObject(ValidRequestObject):
 
     def __init__(self, **kwargs):
         self.q = kwargs.get('q')
+        self.limit = kwargs.get('limit')
+        self.page = kwargs.get('page')
 
     @classmethod
     def from_dict(cls, adict, validator=None):
@@ -17,13 +19,13 @@ class ListAreaRequestObject(ValidRequestObject):
         #     invalid_req.parse_error(errors=validator.get_errors())
         #     return invalid_req
 
-        data = validator.get_valid_data()
+        # data = validator.get_valid_data()
 
         # offset = (int(data['page']) * int(data['limit'])) - int(data['limit'])
 
         return ListAreaRequestObject(**{
-            "q": helper.get_value('q', data, ''),
-            # "page": int(data['page']),
+            "q": adict.get('q'),
+            "page": int(adict.get('page')),
             # "offset": offset,
-            # "limit": int(data['limit']),
+            "limit": int(adict.get('limit')),
         })

@@ -62,8 +62,9 @@ def initialize_tracer():
 
 if __name__ == '__main__':
     tracer = initialize_tracer()
-    sanic_tracing = SanicTracing(tracer, trace_all_requests=True, app=app)
     app.config.from_object(ConfigEnv)
     app.blueprint(bp_expeditions_v1)
     setup_middlewares(app)
-    app.run(host=app.config.HOST, port=app.config.PORT, debug=app.config.DEBUG, auto_reload=app.config.DEBUG, workers=2)
+
+    sanic_tracing = SanicTracing(tracer, trace_all_requests=True, app=app)
+    app.run(host=app.config.HOST, port=app.config.PORT, debug=app.config.DEBUG, auto_reload=app.config.DEBUG)

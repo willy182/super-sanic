@@ -6,6 +6,7 @@ from configs.config import Config
 from src.shared import usecase as uc
 from src.shared.response import response_object as ro
 from src.shared.response.response_object import CommonResponse
+from src.v1.area.serializers.area_serializers import AreaBaseSchema
 from src.v1.expeditions.serializers.expedition_serializers import ExpeditionBaseSchema
 
 
@@ -17,20 +18,45 @@ class ListExpeditionUsecase(uc.UseCase):
     async def process_request(self, request_objects):
         try:
             data_expedition = await asyncio.create_task(self.repo.expedition.get_all(request_objects))
+            data_total_expedition = await asyncio.create_task(self.repo.expedition.get_total(request_objects))
             data_area = await asyncio.create_task(self.repo.area.get_subdistrict_by_zipcode(17111))
-            data_plankton = await asyncio.create_task(self.repo.plankton.get_variant('/variants?filter[skuNo]=3316920142'))
+            data_plankton = await asyncio.create_task(
+                self.repo.plankton.get_variant('/variants?filter[skuNo]=3316920142')
+            )
 
-            # await data_expedition
-            # await data_area
-            # await data_plankton
-            serializer = ExpeditionBaseSchema().dump(data_expedition, many=True)
-            # for data in serializer:
-                # di serialize dulu wak
-                # data['subDistrict'] = data_area
-                # data['plankton'] = data_plankton
-            return ro.ResponseSuccess(serializer)
+            total_page = ceil(data_total_expedition / request_objects.limit)
+
+            serializer_expedition = ExpeditionBaseSchema().dump(data_expedition, many=True)
+            serializer_area = AreaBaseSchema().dump(data_area, many=True)
+
+            plankton_tmp = []
+            for plankton in data_plankton.result().get('data'):
+                plankton_tmp.append(
+                    {
+                        'skuNo': plankton.get('skuNo'),
+                        'fullname': plankton.get('fullname')
+                    }
+                )
+
+            for data in serializer_expedition:
+                data['subDistrict'] = serializer_area
+                data['plankton'] = plankton_tmp
+
+            response = {
+                'success': True,
+                'code': Config.STATUS_CODES[Config.SUCCESS],
+                'message': Config.SUCCESS.lower(),
+                'meta': {
+                    'page': request_objects.page,
+                    'limit': request_objects.limit,
+                    'totalRecords': data_total_expedition,
+                    'totalPages': total_page,
+                },
+                'data': serializer_expedition
+            }
+
+            return ro.ResponseSuccess(response)
 
         except Exception as e:
-            print(e, "got an error")
             return CommonResponse.build_common_message(str(e), Config.SYSTEM_ERROR)
 

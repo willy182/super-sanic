@@ -6,7 +6,6 @@ from helpers.validator.validator_jsonschema import JSONSchemaValidator
 from src.shared.repository import Repository
 from src.shared.request.http_request import HttpRequest
 from src.shared.request.request_sanic import RequestSanicDict
-# from src.shared.response.json import Json
 from src.v1.area.repository.repository_postgres import AreaRepositoryPSQL
 from src.v1.expeditions.repository.repository_postgres import ExpeditionsRepositoryPSQL
 from src.v1.expeditions.usecase.request_object_expedtions import ListAreaRequestObject
