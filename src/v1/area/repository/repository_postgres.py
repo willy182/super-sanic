@@ -5,8 +5,9 @@ from src.v1.model.area import subdistrict_zipcode, subdistrict, district, city, 
 
 
 class AreaRepositoryPSQL(AreaRepository):
-    def __init__(self, db):
+    def __init__(self, db, tracer):
         self._db = db
+        self._tracer = tracer
         super(AreaRepositoryPSQL, self).__init__()
 
     async def get_all_area(self, request_objects):
@@ -21,6 +22,11 @@ class AreaRepositoryPSQL(AreaRepository):
         query = query.order_by(asc(province.c.name), asc(city.c.name)).\
                 limit(request_objects.limit).offset(request_objects.offset)
 
+        with self._tracer.start_span('start_get_all_area') as span:
+            span.log_kv({'event': 'test message'})
+            span.set_tag('query', query)
+            span.set_tag('param', request_objects)
+
         try:
             data = await self.db().fetch_all(query)
         except Exception as e:
@@ -28,14 +34,18 @@ class AreaRepositoryPSQL(AreaRepository):
 
         return data
 
-    async def get_total_subdistrict(self, request_objects):
+    async def get_total_area(self, request_objects):
         query = select([func.count(province.c.name)]). \
             select_from(subdistrict_zipcode.join(subdistrict).
                         join(district).
                         join(city).
                         join(province))
-
         query = self._filter(query, request_objects)
+
+        with self._tracer.start_span('start_get_total_area') as span:
+            span.log_kv({'event': 'test message'})
+            span.set_tag('query', query)
+            span.set_tag('param', request_objects)
 
         try:
             data = await self.db().execute(query)

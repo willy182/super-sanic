@@ -13,10 +13,10 @@ from third_party.product.plankton import PlanktonV4Repository
 
 bp_area_v1 = Blueprint('AreaV1', url_prefix='v1/area')
 
-def _init_repo(db_manager):
+def _init_repo(db_manager, tracer):
     http_client = HttpRequest()
-    repo = Repository(default=AreaRepositoryPSQL(db_manager), **{
-        'area': AreaRepositoryPSQL(db_manager),
+    repo = Repository(default=AreaRepositoryPSQL(db_manager, tracer), **{
+        'area': AreaRepositoryPSQL(db_manager, tracer),
         'plankton': PlanktonV4Repository(http_client),
     })
 
@@ -31,7 +31,7 @@ async def index(request):
     adict = request_dict.query_to_dict()
     adict = validator.get_default_param(adict)
 
-    repo_init = _init_repo(request.app.db)
+    repo_init = _init_repo(db_manager=request.app.db, tracer=request.app.tracer)
     use_cases = ListAllAreaUsecase(repo=repo_init)
     request_object = ListAllAreaRequestObject.from_dict(adict, validator=validator)
     response_object = await use_cases.execute(request_object)

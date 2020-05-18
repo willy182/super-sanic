@@ -7,7 +7,7 @@ class AreaRepository(ABC,object): #pragma: no cover
     async def get_all_area(self, request_objects): pass
 
     @abstractmethod
-    async def get_total_subdistrict(self, request_objects): pass
+    async def get_total_area(self, request_objects): pass
 
     @abstractmethod
     async def get_subdistrict_by_zipcode(self, zipcode): pass

@@ -17,7 +17,7 @@ class ListAllAreaUsecase(uc.UseCase):
     async def process_request(self, request_objects):
         try:
             data = await asyncio.create_task(self.repo.area.get_all_area(request_objects))
-            total = await asyncio.create_task(self.repo.area.get_total_subdistrict(request_objects))
+            total = await asyncio.create_task(self.repo.area.get_total_area(request_objects))
             data_plankton = await asyncio.create_task(
                 self.repo.plankton.get_variant('/variants?&noCache=true')
             )
