@@ -4,10 +4,10 @@ from abc import ABC, abstractmethod
 class ExpeditionsRepository(ABC,object): #pragma: no cover
 
     @abstractmethod
-    async def get_all(self, filters): pass
+    async def get_all(self, request_objects): pass
 
     @abstractmethod
-    async def get_total(self, filters): pass
+    async def get_total(self, request_objects): pass
 
     @abstractmethod
     async def get_by_id(self, id): pass

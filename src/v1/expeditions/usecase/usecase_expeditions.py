@@ -21,7 +21,7 @@ class ListExpeditionUsecase(uc.UseCase):
             data_total_expedition = await asyncio.create_task(self.repo.expedition.get_total(request_objects))
             data_area = await asyncio.create_task(self.repo.area.get_subdistrict_by_zipcode(17111))
             data_plankton = await asyncio.create_task(
-                self.repo.plankton.get_variant('/variants?filter[skuNo]=3316920142')
+                self.repo.plankton.get_variant('/variants?filter[skuNo]=3316920142&noCache=true')
             )
 
             total_page = ceil(data_total_expedition / request_objects.limit)
@@ -59,4 +59,3 @@ class ListExpeditionUsecase(uc.UseCase):
 
         except Exception as e:
             return CommonResponse.build_common_message(str(e), Config.SYSTEM_ERROR)
-

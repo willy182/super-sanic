@@ -5,12 +5,19 @@ from src.v1.model.expeditions import expeditions
 
 
 class ExpeditionsRepositoryPSQL(ExpeditionsRepository):
-    def __init__(self, db):
+    def __init__(self, db, tracer):
         self._db = db
+        self._tracer = tracer
         super(ExpeditionsRepositoryPSQL, self).__init__()
 
-    async def get_all(self, filters):
+    async def get_all(self, request_objects):
         query = select([expeditions]).limit(10).offset(0)
+
+        with self._tracer.start_span('start_get_all_expedition') as span:
+            span.log_kv({'event': 'test message'})
+            span.set_tag('query', query)
+            span.set_tag('param', request_objects)
+
         try:
             data = await self.db().fetch_all(query)
         except Exception as e:
@@ -18,8 +25,13 @@ class ExpeditionsRepositoryPSQL(ExpeditionsRepository):
 
         return data
 
-    async def get_total(self, filters):
+    async def get_total(self, request_objects):
         query = select([func.count()]).select_from(expeditions)
+        with self._tracer.start_span('start_get_total_expedition') as span:
+            span.log_kv({'event': 'test message'})
+            span.set_tag('query', query)
+            span.set_tag('param', request_objects)
+
         try:
             data = await self.db().execute(query)
         except Exception as e:

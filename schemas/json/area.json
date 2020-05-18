@@ -1,0 +1,16 @@
+[
+  {
+    "id": "all_area_get_params",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "schema get all area",
+    "type": "object",
+    "properties": {
+        "q": {
+            "type": ["string", "null"],
+            "default": "",
+            "maxLength": 255,
+            "pattern": "^$|[a-zA-Z0-9,. \/()-]+$"
+        }
+    }
+  }
+]

@@ -7,17 +7,15 @@ from src.shared.repository import Repository
 from src.shared.request.http_request import HttpRequest
 from src.shared.request.request_sanic import RequestSanicDict
 from src.v1.area.repository.repository_postgres import AreaRepositoryPSQL
-from src.v1.expeditions.repository.repository_postgres import ExpeditionsRepositoryPSQL
-from src.v1.expeditions.usecase.request_object_expedtions import ListAreaRequestObject
-from src.v1.expeditions.usecase.usecase_expeditions import ListExpeditionUsecase
+from src.v1.area.usecase.request_object_area import ListAllAreaRequestObject
+from src.v1.area.usecase.usecase_area import ListAllAreaUsecase
 from third_party.product.plankton import PlanktonV4Repository
 
-bp_expeditions_v1 = Blueprint('ExpeditionsV1', url_prefix='v1/expeditions')
+bp_area_v1 = Blueprint('AreaV1', url_prefix='v1/area')
 
-def _init_repo(db_manager, tracer):
+def _init_repo(db_manager):
     http_client = HttpRequest()
-    repo = Repository(default=ExpeditionsRepositoryPSQL(db_manager, tracer), **{
-        'expedition': ExpeditionsRepositoryPSQL(db_manager, tracer),
+    repo = Repository(default=AreaRepositoryPSQL(db_manager), **{
         'area': AreaRepositoryPSQL(db_manager),
         'plankton': PlanktonV4Repository(http_client),
     })
@@ -25,7 +23,7 @@ def _init_repo(db_manager, tracer):
     return repo
 
 
-@bp_expeditions_v1.route('/', methods=['GET'])
+@bp_area_v1.route('/', methods=['GET'])
 async def index(request):
     request_dict = RequestSanicDict(request)
     validator = JSONSchemaValidator()
@@ -33,9 +31,9 @@ async def index(request):
     adict = request_dict.query_to_dict()
     adict = validator.get_default_param(adict)
 
-    repo_init = _init_repo(db_manager=request.app.db, tracer=request.app.tracer)
-    use_cases = ListExpeditionUsecase(repo=repo_init)
-    request_object = ListAreaRequestObject.from_dict(adict, validator=validator)
+    repo_init = _init_repo(request.app.db)
+    use_cases = ListAllAreaUsecase(repo=repo_init)
+    request_object = ListAllAreaRequestObject.from_dict(adict, validator=validator)
     response_object = await use_cases.execute(request_object)
 
     return json(response_object.value, status=Config.STATUS_CODES[response_object.type])
