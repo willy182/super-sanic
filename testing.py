@@ -10,12 +10,18 @@ async def say_after(delay, what):
 
 async def get_url(delay, url):
     await asyncio.sleep(delay)
-    r = requests.get(url)
-    print(r.json()["description"], time.strftime('%X'))
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic cGxhbmt0b246UHJAJDNUeTAtLTREIT1TNG42X192M05kT3I='
+    }
+    r = requests.get(url, headers=headers)
+    print(r.json()["data"][0]["fullname"], time.strftime('%X'))
 
 async def main():
     print(f"started at {time.strftime('%X')}")
-    task1 = asyncio.create_task(get_url(2, 'https://api.github.com/repos/psf/requests'))
+    # task0 = asyncio.create_task(get_url(2, 'https://plankton-api.bhinneka.com/v4/variants?filter[skuNo]=3316920142&noCache=true'))
+
+    task1 = asyncio.create_task(get_url(1, 'https://plankton-api.bhinneka.com/v4/variants?filter[skuNo]=3316920142&noCache=true'))
 
     task2 = asyncio.create_task(say_after(0, 'hello'))
 

@@ -18,12 +18,11 @@ def _init_repo(db_manager, tracer):
     http_client = HttpRequest()
     repo = Repository(default=ExpeditionsRepositoryPSQL(db_manager, tracer), **{
         'expedition': ExpeditionsRepositoryPSQL(db_manager, tracer),
-        'area': AreaRepositoryPSQL(db_manager),
+        'area': AreaRepositoryPSQL(db_manager, tracer),
         'plankton': PlanktonV4Repository(http_client),
     })
 
     return repo
-
 
 @bp_expeditions_v1.route('/', methods=['GET'])
 async def index(request):

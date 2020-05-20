@@ -1,3 +1,5 @@
+import time
+
 from configs.config_env import ConfigEnv
 from third_party.product.product import PlanktonRepository
 
@@ -11,6 +13,7 @@ class PlanktonV4Repository(PlanktonRepository):
 
 
     async def get_variant(self, uri):
+        print('get_variant', time.strftime('%X'))
 
         plankton_header = {
             "Authorization": self.__token,

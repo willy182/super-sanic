@@ -22,7 +22,6 @@ def _init_repo(db_manager, tracer):
 
     return repo
 
-
 @bp_area_v1.route('/', methods=['GET'])
 async def index(request):
     request_dict = RequestSanicDict(request)

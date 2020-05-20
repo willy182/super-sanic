@@ -16,13 +16,27 @@ class ListExpeditionUsecase(uc.UseCase):
         self.repo = repo
 
     async def process_request(self, request_objects):
+        # loop = asyncio.get_event_loop()
         try:
-            data_expedition = await asyncio.create_task(self.repo.expedition.get_all(request_objects))
-            data_total_expedition = await asyncio.create_task(self.repo.expedition.get_total(request_objects))
-            data_area = await asyncio.create_task(self.repo.area.get_subdistrict_by_zipcode(17111))
-            data_plankton = await asyncio.create_task(
+            task1 = asyncio.create_task(self.repo.expedition.get_all(request_objects))
+            task2 = asyncio.create_task(self.repo.expedition.get_total(request_objects))
+            task3 = asyncio.create_task(self.repo.area.get_subdistrict_by_zipcode(17111))
+            task4 = asyncio.create_task(
                 self.repo.plankton.get_variant('/variants?filter[skuNo]=3316920142&noCache=true')
             )
+            all_tasks = [task1, task2, task3, task4]
+            done_tasks, pending_tasks = await asyncio.wait(all_tasks, return_when=asyncio.ALL_COMPLETED)
+
+            for done in done_tasks:
+                name = done._coro.cr_code.co_name
+                if name == 'get_all':
+                    data_expedition = done.result()
+                elif name == 'get_total':
+                    data_total_expedition = done.result()
+                elif name == 'get_subdistrict_by_zipcode':
+                    data_area = done.result()
+                elif name == 'get_variant':
+                    data_plankton = done.result()
 
             total_page = ceil(data_total_expedition / request_objects.limit)
 

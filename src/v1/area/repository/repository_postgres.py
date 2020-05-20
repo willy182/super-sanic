@@ -1,3 +1,4 @@
+import time
 from sqlalchemy import select, func, or_, asc
 
 from src.v1.area.repository.repository import AreaRepository
@@ -11,6 +12,8 @@ class AreaRepositoryPSQL(AreaRepository):
         super(AreaRepositoryPSQL, self).__init__()
 
     async def get_all_area(self, request_objects):
+        print('get_all_area', time.strftime('%X'))
+
         query = select([province.c.name.label('province'), city.c.name.label('city'), city.c.type,
                         district.c.name.label('district'), subdistrict.c.name.label('subdistrict'),
                         subdistrict_zipcode.c.zip_code]).\
@@ -23,7 +26,7 @@ class AreaRepositoryPSQL(AreaRepository):
                 limit(request_objects.limit).offset(request_objects.offset)
 
         with self._tracer.start_span('start_get_all_area') as span:
-            span.log_kv({'event': 'test message'})
+            span.log_kv({'start_time': time.strftime('%X')})
             span.set_tag('query', query)
             span.set_tag('param', request_objects)
 
@@ -35,6 +38,8 @@ class AreaRepositoryPSQL(AreaRepository):
         return data
 
     async def get_total_area(self, request_objects):
+        print('get_total_area', time.strftime('%X'))
+
         query = select([func.count(province.c.name)]). \
             select_from(subdistrict_zipcode.join(subdistrict).
                         join(district).
@@ -43,7 +48,7 @@ class AreaRepositoryPSQL(AreaRepository):
         query = self._filter(query, request_objects)
 
         with self._tracer.start_span('start_get_total_area') as span:
-            span.log_kv({'event': 'test message'})
+            span.log_kv({'start_time': time.strftime('%X')})
             span.set_tag('query', query)
             span.set_tag('param', request_objects)
 
@@ -56,8 +61,16 @@ class AreaRepositoryPSQL(AreaRepository):
         return data
 
     async def get_subdistrict_by_zipcode(self, zipcode):
+        print('get_subdistrict_by_zipcode', time.strftime('%X'))
+
         query = select([subdistrict.c.name]).select_from(subdistrict.join(subdistrict_zipcode)) \
             .where(subdistrict_zipcode.c.zip_code == zipcode)
+
+        with self._tracer.start_span('start_get_subdistrict_by_zipcode') as span:
+            span.log_kv({'start_time': time.strftime('%X')})
+            span.set_tag('query', query)
+            span.set_tag('zipcode', zipcode)
+
         try:
             data = await self.db().fetch_all(query)
         except Exception as e:

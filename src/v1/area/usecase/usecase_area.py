@@ -16,11 +16,20 @@ class ListAllAreaUsecase(uc.UseCase):
 
     async def process_request(self, request_objects):
         try:
-            data = await asyncio.create_task(self.repo.area.get_all_area(request_objects))
-            total = await asyncio.create_task(self.repo.area.get_total_area(request_objects))
-            data_plankton = await asyncio.create_task(
-                self.repo.plankton.get_variant('/variants?&noCache=true')
-            )
+            task1 = asyncio.create_task(self.repo.area.get_all_area(request_objects))
+            task2 = asyncio.create_task(self.repo.area.get_total_area(request_objects))
+            task3 = asyncio.create_task(self.repo.plankton.get_variant('/variants?noCache=true'))
+            all_tasks = [task1, task2, task3]
+            done_tasks, pending_tasks = await asyncio.wait(all_tasks, return_when=asyncio.ALL_COMPLETED)
+
+            for done in done_tasks:
+                name = done._coro.cr_code.co_name
+                if name == 'get_all_area':
+                    data = done.result()
+                elif name == 'get_total_area':
+                    total = done.result()
+                elif name == 'get_variant':
+                    data_plankton = done.result()
 
             total_page = ceil(total / request_objects.limit)
 
