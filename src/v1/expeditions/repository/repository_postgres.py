@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from sqlalchemy import select, func
 
@@ -15,6 +16,7 @@ class ExpeditionsRepositoryPSQL(ExpeditionsRepository):
     async def get_all(self, request_objects):
         now1 = datetime.now()
         tt1 = now1.time()
+        print('get_all_start', tt1)
 
         query = select([expeditions]).limit(10).offset(0)
 
@@ -24,6 +26,7 @@ class ExpeditionsRepositoryPSQL(ExpeditionsRepository):
 
                 now2 = datetime.now()
                 tt2 = now2.time()
+                print('get_all_end', tt2)
                 str_time = get_result_subtraction_time(tt1, tt2)
 
                 span.log_kv({'process_time': str_time})
@@ -38,6 +41,7 @@ class ExpeditionsRepositoryPSQL(ExpeditionsRepository):
     async def get_total(self, request_objects):
         now1 = datetime.now()
         tt1 = now1.time()
+        print('get_total_start', tt1)
 
         query = select([func.count()]).select_from(expeditions)
 
@@ -47,6 +51,7 @@ class ExpeditionsRepositoryPSQL(ExpeditionsRepository):
 
                 now2 = datetime.now()
                 tt2 = now2.time()
+                print('get_total_end', tt2)
                 str_time = get_result_subtraction_time(tt1, tt2)
 
                 span.log_kv({'process_time': str_time})
@@ -61,6 +66,7 @@ class ExpeditionsRepositoryPSQL(ExpeditionsRepository):
     async def get_by_id(self, id):
         now1 = datetime.now()
         tt1 = now1.time()
+        print('get_by_id_start', tt1)
 
         query = expeditions.select().where('id' == id)
 
@@ -70,6 +76,7 @@ class ExpeditionsRepositoryPSQL(ExpeditionsRepository):
 
                 now2 = datetime.now()
                 tt2 = now2.time()
+                print('get_by_id_end', tt2)
                 str_time = get_result_subtraction_time(tt1, tt2)
 
                 span.log_kv({'process_time': str_time})

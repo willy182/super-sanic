@@ -1,6 +1,7 @@
 import time
 
 import aiohttp
+from datetime import datetime
 
 from configs.config_env import ConfigEnv
 from src.shared.request.request_sanic import fetch_aio
@@ -17,6 +18,11 @@ class PlanktonV4Repository(PlanktonRepository):
 
 
     async def get_variant(self, uri):
+        # print('get_variant', time.strftime('%X'))
+        now1 = datetime.now()
+        tt1 = now1.time()
+        # print(tt1)
+
         plankton_header = {
             "Authorization": self.__token,
             "Content-Type": "application/json"

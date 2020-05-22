@@ -17,6 +17,7 @@ class AreaRepositoryPSQL(AreaRepository):
     async def get_all_area(self, request_objects):
         now1 = datetime.now()
         tt1 = now1.time()
+        print('get_all_area_start', tt1)
 
         query = select([province.c.name.label('province'), city.c.name.label('city'), city.c.type,
                         district.c.name.label('district'), subdistrict.c.name.label('subdistrict'),
@@ -35,6 +36,7 @@ class AreaRepositoryPSQL(AreaRepository):
 
                 now2 = datetime.now()
                 tt2 = now2.time()
+                print('get_all_area_end', tt2)
                 str_time = get_result_subtraction_time(tt1, tt2)
 
                 span.log_kv({'process_time': str_time})
@@ -49,6 +51,7 @@ class AreaRepositoryPSQL(AreaRepository):
     async def get_total_area(self, request_objects):
         now1 = datetime.now()
         tt1 = now1.time()
+        print('get_total_area_start', tt1)
 
         query = select([func.count(province.c.name)]). \
             select_from(subdistrict_zipcode.join(subdistrict).
@@ -63,6 +66,7 @@ class AreaRepositoryPSQL(AreaRepository):
 
                 now2 = datetime.now()
                 tt2 = now2.time()
+                print('get_total_area_end', tt2)
                 str_time = get_result_subtraction_time(tt1, tt2)
 
                 span.log_kv({'process_time': str_time})
@@ -77,6 +81,7 @@ class AreaRepositoryPSQL(AreaRepository):
     async def get_subdistrict_by_zipcode(self, zipcode):
         now1 = datetime.now()
         tt1 = now1.time()
+        print('get_subdistrict_by_zipcode_start', tt1)
 
         query = select([subdistrict.c.name]).select_from(subdistrict.join(subdistrict_zipcode)) \
             .where(subdistrict_zipcode.c.zip_code == zipcode)
@@ -87,6 +92,7 @@ class AreaRepositoryPSQL(AreaRepository):
 
                 now2 = datetime.now()
                 tt2 = now2.time()
+                print('get_subdistrict_by_zipcode_end', tt2)
                 str_time = get_result_subtraction_time(tt1, tt2)
 
                 span.log_kv({'process_time': str_time})

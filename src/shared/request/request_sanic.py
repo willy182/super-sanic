@@ -95,6 +95,7 @@ class RequestCurlTo:
 async def fetch_aio(session, url, headers, tracer):
     now1 = datetime.now()
     tt1 = now1.time()
+    print(url, tt1)
 
     with tracer.start_span(url) as span:
         async with session.get(url, headers=headers) as response:
@@ -105,5 +106,6 @@ async def fetch_aio(session, url, headers, tracer):
         str_time = get_result_subtraction_time(tt1, tt2)
         span.log_kv({'process_time': str_time})
         span.set_tag('url', url)
+        print(url, tt2)
 
     return res
