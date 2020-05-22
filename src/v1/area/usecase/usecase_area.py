@@ -19,7 +19,8 @@ class ListAllAreaUsecase(uc.UseCase):
             task1 = asyncio.create_task(self.repo.area.get_all_area(request_objects))
             task2 = asyncio.create_task(self.repo.area.get_total_area(request_objects))
             task3 = asyncio.create_task(self.repo.plankton.get_variant('/variants?noCache=true'))
-            all_tasks = [task1, task2, task3]
+            task4 = asyncio.create_task(self.repo.plankton.get_variant('/variants?include=product,offers&page[number]=1&page[size]=100&filter[status]=published&channel=b2b&noCache=true'))
+            all_tasks = [task1, task2, task3, task4]
             done_tasks, pending_tasks = await asyncio.wait(all_tasks, return_when=asyncio.ALL_COMPLETED)
 
             for done in done_tasks:
@@ -36,7 +37,7 @@ class ListAllAreaUsecase(uc.UseCase):
             serializer_area = AllAreaBaseSchema().dump(data, many=True)
 
             plankton_tmp = []
-            for i, row in enumerate(data_plankton.result().get('data')):
+            for i, row in enumerate(data_plankton.get('data')):
                 if i == 3:
                     break
                 else:

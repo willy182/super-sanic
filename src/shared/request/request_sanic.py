@@ -1,5 +1,10 @@
 import json
 import requests
+
+from datetime import datetime
+from tornado import gen
+
+from helpers.helper import get_result_subtraction_time
 from src.shared.request.irequest import Request
 
 
@@ -68,8 +73,8 @@ class RequestSanicDict(Request):
 
 
 class RequestCurlTo:
-    @staticmethod
-    async def curl_post(url, headers, data):
+    @gen.coroutine
+    def curl_post(url, headers, data):
         r = requests.post(
             url,
             headers=headers,
@@ -78,11 +83,27 @@ class RequestCurlTo:
 
         return json.loads(r.text)
 
-    @staticmethod
-    async def curl(url, headers):
+    @gen.coroutine
+    def curl(url, headers):
         r = requests.get(
             url,
             headers=headers,
         )
 
         return json.loads(r.text)
+
+async def fetch_aio(session, url, headers, tracer):
+    now1 = datetime.now()
+    tt1 = now1.time()
+
+    with tracer.start_span(url) as span:
+        async with session.get(url, headers=headers) as response:
+            res = await response.json()
+
+        now2 = datetime.now()
+        tt2 = now2.time()
+        str_time = get_result_subtraction_time(tt1, tt2)
+        span.log_kv({'process_time': str_time})
+        span.set_tag('url', url)
+
+    return res

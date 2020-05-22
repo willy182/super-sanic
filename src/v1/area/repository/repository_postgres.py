@@ -1,6 +1,9 @@
 import time
+
+from datetime import datetime
 from sqlalchemy import select, func, or_, asc
 
+from helpers.helper import get_result_subtraction_time
 from src.v1.area.repository.repository import AreaRepository
 from src.v1.model.area import subdistrict_zipcode, subdistrict, district, city, province
 
@@ -12,7 +15,8 @@ class AreaRepositoryPSQL(AreaRepository):
         super(AreaRepositoryPSQL, self).__init__()
 
     async def get_all_area(self, request_objects):
-        print('get_all_area', time.strftime('%X'))
+        now1 = datetime.now()
+        tt1 = now1.time()
 
         query = select([province.c.name.label('province'), city.c.name.label('city'), city.c.type,
                         district.c.name.label('district'), subdistrict.c.name.label('subdistrict'),
@@ -26,19 +30,25 @@ class AreaRepositoryPSQL(AreaRepository):
                 limit(request_objects.limit).offset(request_objects.offset)
 
         with self._tracer.start_span('start_get_all_area') as span:
-            span.log_kv({'start_time': time.strftime('%X')})
-            span.set_tag('query', query)
-            span.set_tag('param', request_objects)
+            try:
+                data = await self.db().fetch_all(query)
 
-        try:
-            data = await self.db().fetch_all(query)
-        except Exception as e:
-            data = e
+                now2 = datetime.now()
+                tt2 = now2.time()
+                str_time = get_result_subtraction_time(tt1, tt2)
+
+                span.log_kv({'process_time': str_time})
+                span.set_tag('query', query)
+                span.set_tag('param', request_objects)
+            except Exception as e:
+                span.set_tag('error', e)
+                data = e
 
         return data
 
     async def get_total_area(self, request_objects):
-        print('get_total_area', time.strftime('%X'))
+        now1 = datetime.now()
+        tt1 = now1.time()
 
         query = select([func.count(province.c.name)]). \
             select_from(subdistrict_zipcode.join(subdistrict).
@@ -48,33 +58,43 @@ class AreaRepositoryPSQL(AreaRepository):
         query = self._filter(query, request_objects)
 
         with self._tracer.start_span('start_get_total_area') as span:
-            span.log_kv({'start_time': time.strftime('%X')})
-            span.set_tag('query', query)
-            span.set_tag('param', request_objects)
+            try:
+                data = await self.db().execute(query)
 
-        try:
-            data = await self.db().execute(query)
-        except Exception as e:
-            print(e, "error ")
-            data = e
+                now2 = datetime.now()
+                tt2 = now2.time()
+                str_time = get_result_subtraction_time(tt1, tt2)
+
+                span.log_kv({'process_time': str_time})
+                span.set_tag('query', query)
+                span.set_tag('param', request_objects)
+            except Exception as e:
+                span.set_tag('error', e)
+                data = e
 
         return data
 
     async def get_subdistrict_by_zipcode(self, zipcode):
-        print('get_subdistrict_by_zipcode', time.strftime('%X'))
+        now1 = datetime.now()
+        tt1 = now1.time()
 
         query = select([subdistrict.c.name]).select_from(subdistrict.join(subdistrict_zipcode)) \
             .where(subdistrict_zipcode.c.zip_code == zipcode)
 
         with self._tracer.start_span('start_get_subdistrict_by_zipcode') as span:
-            span.log_kv({'start_time': time.strftime('%X')})
-            span.set_tag('query', query)
-            span.set_tag('zipcode', zipcode)
+            try:
+                data = await self.db().fetch_all(query)
 
-        try:
-            data = await self.db().fetch_all(query)
-        except Exception as e:
-            data = e
+                now2 = datetime.now()
+                tt2 = now2.time()
+                str_time = get_result_subtraction_time(tt1, tt2)
+
+                span.log_kv({'process_time': str_time})
+                span.set_tag('query', query)
+                span.set_tag('zipcode', zipcode)
+            except Exception as e:
+                span.set_tag('error', e)
+                data = e
 
         return data
 

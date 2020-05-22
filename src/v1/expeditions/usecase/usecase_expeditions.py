@@ -16,7 +16,6 @@ class ListExpeditionUsecase(uc.UseCase):
         self.repo = repo
 
     async def process_request(self, request_objects):
-        # loop = asyncio.get_event_loop()
         try:
             task1 = asyncio.create_task(self.repo.expedition.get_all(request_objects))
             task2 = asyncio.create_task(self.repo.expedition.get_total(request_objects))
@@ -44,7 +43,7 @@ class ListExpeditionUsecase(uc.UseCase):
             serializer_area = AreaBaseSchema().dump(data_area, many=True)
 
             plankton_tmp = []
-            for plankton in data_plankton.result().get('data'):
+            for plankton in data_plankton.get('data'):
                 plankton_tmp.append(
                     {
                         'skuNo': plankton.get('skuNo'),
