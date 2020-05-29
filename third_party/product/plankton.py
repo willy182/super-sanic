@@ -1,7 +1,6 @@
-import time
-
 import aiohttp
-from datetime import datetime
+
+import requests
 
 from configs.config_env import ConfigEnv
 from src.shared.request.request_sanic import fetch_aio
@@ -18,11 +17,6 @@ class PlanktonV4Repository(PlanktonRepository):
 
 
     async def get_variant(self, uri):
-        # print('get_variant', time.strftime('%X'))
-        now1 = datetime.now()
-        tt1 = now1.time()
-        # print(tt1)
-
         plankton_header = {
             "Authorization": self.__token,
             "Content-Type": "application/json"
@@ -30,12 +24,15 @@ class PlanktonV4Repository(PlanktonRepository):
 
         url = '{}/v4{}'.format(self.__url, uri)
 
-        # response = await self.__http_client.do_get_request(
-        #     url=url,
-        #     header=plankton_header
+        # response = requests.get(
+        #     url,
+        #     headers=plankton_header,
         # )
+        #
+        # response = response.json()
 
-        async with aiohttp.ClientSession() as session:
-            response = await fetch_aio(session, url, plankton_header, self.__tracer)
+        timeout = aiohttp.ClientTimeout(total=10) # timeout dalam satuan menit
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            response = await fetch_aio(session, url, plankton_header, timeout, self.__tracer)
 
         return response

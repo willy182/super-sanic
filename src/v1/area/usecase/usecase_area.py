@@ -16,21 +16,26 @@ class ListAllAreaUsecase(uc.UseCase):
 
     async def process_request(self, request_objects):
         try:
-            task1 = asyncio.create_task(self.repo.area.get_all_area(request_objects))
-            task2 = asyncio.create_task(self.repo.area.get_total_area(request_objects))
-            task3 = asyncio.create_task(self.repo.plankton.get_variant('/variants?noCache=true'))
-            task4 = asyncio.create_task(self.repo.plankton.get_variant('/variants?include=product,offers&page[number]=1&page[size]=100&filter[status]=published&channel=b2b&noCache=true'))
+            task1 = asyncio.create_task(self.repo.area.get_all_area(request_objects), name='data_area')
+            task2 = asyncio.create_task(self.repo.area.get_total_area(request_objects), name='total_area')
+            task3 = asyncio.create_task(self.repo.plankton.get_variant('/variants?noCache=true'), name='data_variant')
+            task4 = asyncio.create_task(
+                self.repo.plankton.get_variant('/variants?include=product,offers&page[number]=1&page[size]=100&filter[status]=published&channel=b2b&noCache=true'),
+                name='plankton_include'
+            )
             all_tasks = [task1, task2, task3, task4]
             done_tasks, pending_tasks = await asyncio.wait(all_tasks, return_when=asyncio.ALL_COMPLETED)
 
             for done in done_tasks:
-                name = done._coro.cr_code.co_name
-                if name == 'get_all_area':
+                name = done.get_name()
+                if name == 'data_area':
                     data = done.result()
-                elif name == 'get_total_area':
+                elif name == 'total_area':
                     total = done.result()
-                elif name == 'get_variant':
+                elif name == 'data_variant':
                     data_plankton = done.result()
+                elif name == 'plankton_include':
+                    plankton_include = done.result()
 
             total_page = ceil(total / request_objects.limit)
 

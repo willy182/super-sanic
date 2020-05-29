@@ -92,13 +92,13 @@ class RequestCurlTo:
 
         return json.loads(r.text)
 
-async def fetch_aio(session, url, headers, tracer):
+async def fetch_aio(session, url, headers, timeout, tracer):
     now1 = datetime.now()
     tt1 = now1.time()
     print(url, tt1)
 
     with tracer.start_span(url) as span:
-        async with session.get(url, headers=headers) as response:
+        async with session.get(url, headers=headers, timeout=timeout) as response:
             res = await response.json()
 
         now2 = datetime.now()
