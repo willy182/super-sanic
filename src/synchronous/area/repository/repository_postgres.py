@@ -1,4 +1,3 @@
-from helpers.helper import get_value_from_dict
 from src.synchronous.area.repository.repository import AreaRepository
 
 

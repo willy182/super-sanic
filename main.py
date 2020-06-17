@@ -1,3 +1,7 @@
+import asyncio
+
+import aiohttp
+import uvloop
 from opentracing_instrumentation.client_hooks import install_all_patches
 from jaeger_client import Config as JaegerConfig
 from environs import Env
@@ -27,6 +31,16 @@ def setup_schemas(app, loop):
     :return:
     """
     JSONSchemaLoader.load(path='schemas/json/', filename="*.json")
+
+def setup_aiohttp():
+    @app.listener('before_server_start')
+    async def init(app, loop):
+        app.aiohttp_session = aiohttp.ClientSession(loop=loop)
+
+    @app.listener('after_server_stop')
+    async def finish(app, loop):
+        loop.run_until_complete(app.aiohttp_session.close())
+        loop.close()
 
 @app.listener('before_server_start')
 def setup_db(app, loop):
@@ -71,6 +85,8 @@ def initialize_tracer():
     return jaeger_config.initialize_tracer()
 
 if __name__ == '__main__':
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
     tracer = initialize_tracer()
     app.tracer = tracer
     app.config.from_object(ConfigEnv)
@@ -79,6 +95,7 @@ if __name__ == '__main__':
     app.blueprint(bp_expeditions_sync)
     app.blueprint(bp_area_sync)
 
+    setup_aiohttp()
     setup_database()
     setup_middlewares(app, tracer)
 

@@ -1,5 +1,3 @@
-import asyncio
-import uvloop
 from databases import Database
 from orator import DatabaseManager, Model
 
@@ -91,8 +89,6 @@ class DatabasesManager(object):
                                               self.config.get(conn_name).get("database"))
 
         try:
-            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
             self.db_store = Database(db_url)
         except Exception as e:
             print(e)

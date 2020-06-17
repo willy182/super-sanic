@@ -13,11 +13,11 @@ from third_party.product.plankton import PlanktonV4RepositoryAsync
 
 bp_expeditions_async = Blueprint('ExpeditionsAsync', url_prefix='asynchronous/expeditions')
 
-def _init_repo(db_manager, tracer):
+def _init_repo(db_manager, tracer, session):
     repo = Repository(default=ExpeditionsRepositoryPSQL(db_manager, tracer), **{
         'expedition': ExpeditionsRepositoryPSQL(db_manager, tracer),
         'area': AreaRepositoryPSQL(db_manager, tracer),
-        'plankton': PlanktonV4RepositoryAsync(tracer),
+        'plankton': PlanktonV4RepositoryAsync(tracer, session),
     })
 
     return repo
@@ -30,7 +30,7 @@ async def index(request):
     adict = request_dict.query_to_dict()
     adict = validator.get_default_param(adict)
 
-    repo_init = _init_repo(db_manager=request.app.db, tracer=request.app.tracer)
+    repo_init = _init_repo(db_manager=request.app.db, tracer=request.app.tracer, session=request.app.aiohttp_session)
     use_cases = ListExpeditionUsecase(repo=repo_init)
     request_object = ListAreaRequestObject.from_dict(adict, validator=validator)
     response_object = await use_cases.execute(request_object)
