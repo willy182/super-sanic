@@ -5,11 +5,13 @@ from sanic import Sanic
 from tracer import SanicTracing
 
 from configs.config_env import ConfigEnv
-from configs.setup_db import connect_db, connect_db_simple
+from configs.setup_db import connect_db, connect_db_orator
 from middleware.middleware import setup_middlewares
 from schemas.json.loader import JSONSchemaLoader
-from src.v1.area.delivery.http_handler import bp_area_v1
-from src.v1.expeditions.delivery.http_handler import bp_expeditions_v1
+from src.asynchronous.area.delivery.http_handler import bp_area_async
+from src.asynchronous.expeditions.delivery.http_handler import bp_expeditions_async
+from src.synchronous.area.delivery.http_handler import bp_area_sync
+from src.synchronous.expeditions.delivery.http_handler import bp_expeditions_sync
 
 app = Sanic(__name__)
 
@@ -26,11 +28,14 @@ def setup_schemas(app, loop):
     """
     JSONSchemaLoader.load(path='schemas/json/', filename="*.json")
 
+@app.listener('before_server_start')
+def setup_db(app, loop):
+    app.db_orator = connect_db_orator(env)
+
 def setup_database():
     @app.listener('before_server_start')
     async def connect_to_db(app, loop):
         app.db = connect_db(env)
-        # app.db = connect_db_simple(env)
 
         # await app.db.connect()
         await app.db.get("read").connect()
@@ -38,9 +43,12 @@ def setup_database():
 
     @app.listener('after_server_stop')
     async def disconnect_from_db(app):
-        # await app.db.disconnect()
         await app.db.get("read").disconnect()
         await app.db.get("write").disconnect()
+
+@app.listener("after_server_stop")
+def close_db(app, loop):
+    app.db_orator.disconnect()
 
 def initialize_tracer():
     install_all_patches()
@@ -66,8 +74,10 @@ if __name__ == '__main__':
     tracer = initialize_tracer()
     app.tracer = tracer
     app.config.from_object(ConfigEnv)
-    app.blueprint(bp_expeditions_v1)
-    app.blueprint(bp_area_v1)
+    app.blueprint(bp_expeditions_async)
+    app.blueprint(bp_area_async)
+    app.blueprint(bp_expeditions_sync)
+    app.blueprint(bp_area_sync)
 
     setup_database()
     setup_middlewares(app, tracer)

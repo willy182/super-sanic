@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import math
+
 
 def get_value(field, data, default):
     """
@@ -30,3 +32,15 @@ def get_result_subtraction_time(time1, time2):
         str_time = '{}ms'.format(int(milsec))
 
     return str_time
+
+def meta_data(query, data):
+    return {
+        'totalRecords': query.total,
+        'totalPages': math.ceil(query.total / data.get('limit', 25)),
+        'limit': data.get('limit', 25),
+        'page': query.current_page,
+        'count': query.count()
+    }
+
+def get_value_from_dict(adict, key, default):
+    return adict.get(key, default)

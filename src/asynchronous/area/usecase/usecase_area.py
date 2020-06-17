@@ -6,10 +6,10 @@ from configs.config import Config
 from src.shared import usecase as uc
 from src.shared.response import response_object as ro
 from src.shared.response.response_object import CommonResponse
-from src.v1.area.serializers.area_serializers import AllAreaBaseSchema
+from src.asynchronous.area.serializers.area_serializers import AllAreaBaseSchema
 
 
-class ListAllAreaUsecase(uc.UseCase):
+class ListAllAreaUsecase(uc.UseCaseAsync):
 
     def __init__(self, repo):
         self.repo = repo
@@ -73,6 +73,9 @@ class ListAllAreaUsecase(uc.UseCase):
             }
 
             return ro.ResponseSuccess(response)
+
+        except asyncio.TimeoutError:
+            return CommonResponse.build_common_message("time out error", Config.SYSTEM_ERROR)
 
         except Exception as e:
             return CommonResponse.build_common_message(str(e), Config.SYSTEM_ERROR)

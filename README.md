@@ -4,7 +4,7 @@
 Asynchronous Sanic, reference from [davittovmasyan](https://medium.com/@davittovmasyan/goin-fast-and-asynchronous-with-python-and-sanic-387d722f3668)
 
 ## Requirement
-- python 3.8.**
+- python 3.8.*
 
 ## Running the program
 - `$ pip install -r requirement.txt`

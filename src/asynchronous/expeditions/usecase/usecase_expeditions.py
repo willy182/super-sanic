@@ -6,11 +6,11 @@ from configs.config import Config
 from src.shared import usecase as uc
 from src.shared.response import response_object as ro
 from src.shared.response.response_object import CommonResponse
-from src.v1.area.serializers.area_serializers import AreaBaseSchema
-from src.v1.expeditions.serializers.expedition_serializers import ExpeditionBaseSchema
+from src.asynchronous.area.serializers.area_serializers import AreaBaseSchema
+from src.asynchronous.expeditions.serializers.expedition_serializers import ExpeditionBaseSchema
 
 
-class ListExpeditionUsecase(uc.UseCase):
+class ListExpeditionUsecase(uc.UseCaseAsync):
 
     def __init__(self, repo):
         self.repo = repo

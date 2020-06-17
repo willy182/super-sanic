@@ -1,4 +1,37 @@
+import asyncio
+import uvloop
 from databases import Database
+from orator import DatabaseManager, Model
+
+
+def connect_db_orator(env):
+    config = {
+        'default': 'read',
+        'read': {
+            'host': env("POSTGRE_HOST_READ"),
+            'driver': 'pgsql',
+            'database': env("POSTGRE_DATABASE"),
+            'user': env("POSTGRE_USERNAME"),
+            'password': env("POSTGRE_PASSWORD"),
+            'prefix': '',
+            'port': env("POSTGRE_PORT")
+        },
+        'write': {
+            'host': env("POSTGRE_HOST_READ"),
+            'driver': 'pgsql',
+            'database': env("POSTGRE_DATABASE"),
+            'user': env("POSTGRE_USERNAME"),
+            'password': env("POSTGRE_PASSWORD"),
+            'prefix': '',
+            'port': env("POSTGRE_PORT")
+        }
+    }
+
+    db = DatabaseManager(config)
+
+    Model.set_connection_resolver(db)
+
+    return db
 
 
 def config_db(env):
@@ -34,7 +67,7 @@ def connect_db_simple(env):
 def connect_db(env):
     config = config_db(env)
 
-    db = DatabaseManager(config)
+    db = DatabasesManager(config)
 
     connection = {
         "read": db.add("read"),
@@ -44,7 +77,7 @@ def connect_db(env):
     return connection
 
 
-class DatabaseManager(object):
+class DatabasesManager(object):
     def __init__(self, config):
         self.config = config
         self.db_store = None
@@ -58,6 +91,8 @@ class DatabaseManager(object):
                                               self.config.get(conn_name).get("database"))
 
         try:
+            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
             self.db_store = Database(db_url)
         except Exception as e:
             print(e)
