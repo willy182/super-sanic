@@ -1,49 +1,38 @@
 import asyncio
-import time
-from datetime import datetime
-
-import aiohttp
+import random
 
 
-async def say_after(delay, what):
-    await asyncio.sleep(delay)
-    now = datetime.now()
-    print(what, now.time())
+async def coro(tag):
+    print(">", tag)
+    await asyncio.sleep(random.uniform(0.5, 5))
+    print("<", tag)
+    return tag
 
-async def get_url(delay, url):
-    await asyncio.sleep(delay)
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic cGxhbmt0b246UHJAJDNUeTAtLTREIT1TNG42X192M05kT3I='
-    }
-    timeout = aiohttp.ClientTimeout(total=20)  # timeout dalam satuan menit
-    async with aiohttp.ClientSession(timeout=timeout) as session:
-        response = await fetch_aio(session, url, headers, timeout)
 
-    print(url, response)
+loop = asyncio.get_event_loop()
 
-async def fetch_aio(session, url, headers, timeout):
-    now1 = datetime.now()
-    tt1 = now1.time()
-    print(url, tt1)
+tasks = [coro(i) for i in range(1, 11)]
 
-    async with session.get(url, headers=headers, timeout=timeout) as response:
-        res = await response.json()
+print("Get first result:")
+finished, unfinished = loop.run_until_complete(
+    asyncio.wait(tasks, return_when=asyncio.ALL_COMPLETED))
 
-    now2 = datetime.now()
-    tt2 = now2.time()
-    print(url, tt2)
+for task in finished:
+    print(task.result())
+print("unfinished:", len(unfinished))
 
-    return res
+print("Get more results in 2 seconds:")
+finished2, unfinished2 = loop.run_until_complete(
+    asyncio.wait(unfinished, timeout=2))
 
-async def main():
-    print(f"started at {time.strftime('%X')}")
+for task in finished2:
+    print(task.result())
+print("unfinished2:", len(unfinished2))
 
-    await asyncio.gather(
-        get_url(0, 'https://plankton-api.bhinneka.com/v4/variants?noCache=true'),
-        say_after(0, 'lahloh'),
-        get_url(0, 'https://plankton-api.bhinneka.com/v4/variants?include=product,offers&page[number]=1&page[size]=100&filter[status]=published&channel=b2b&noCache=true'),
-    )
-    print(f"finished at {time.strftime('%X')}")
+print("Get all other results:")
+finished3, unfinished3 = loop.run_until_complete(asyncio.wait(unfinished2))
 
-asyncio.run(main())
+for task in finished3:
+    print(task.result())
+
+loop.close()

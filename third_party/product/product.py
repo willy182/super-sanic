@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 
 
-class PlanktonRepository():
+class PlanktonRepository(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def get_variant(self, request): pass
+    async def get_variant(self, request): pass

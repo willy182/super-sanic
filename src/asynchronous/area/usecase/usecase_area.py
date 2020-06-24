@@ -24,40 +24,113 @@ class ListAllAreaUsecase(uc.UseCaseAsync):
                 name='plankton_include'
             )
             all_tasks = [task1, task2, task3, task4]
-            done_tasks, pending_tasks = await asyncio.wait(all_tasks, return_when=asyncio.ALL_COMPLETED)
+            done_tasks, pending_tasks = await asyncio.wait(all_tasks, timeout=50, return_when=asyncio.ALL_COMPLETED)
 
-            for done in done_tasks:
-                name = done.get_name()
-                if name == 'data_area':
-                    data = done.result()
-                elif name == 'total_area':
-                    total = done.result()
-                elif name == 'data_variant':
-                    data_plankton = done.result()
-                elif name == 'plankton_include':
-                    plankton_include = done.result()
+            data = None
+            total = None
+            data_plankton = None
+            plankton_include = None
+            init_pass = True
+            count = 0
+            while init_pass or len(pending_tasks) > 0:
+                init_pass = False
+                if count == 3:
+                    return CommonResponse.build_common_message("pending tasks", Config.SYSTEM_ERROR)
+
+                for done in done_tasks:
+                    name = done.get_name()
+                    if name == 'data_area':
+                        data = done.result()
+                    elif name == 'total_area':
+                        total = done.result()
+                    elif name == 'data_variant':
+                        data_plankton = done.result()
+                    elif name == 'plankton_include':
+                        plankton_include = done.result()
+
+                done_tasks, pending_tasks = await asyncio.wait(all_tasks, timeout=50, return_when=asyncio.ALL_COMPLETED)
+                count += 1
 
             total_page = ceil(total / request_objects.limit)
 
             serializer_area = AllAreaBaseSchema().dump(data, many=True)
 
             plankton_tmp = []
-            for i, row in enumerate(data_plankton.get('data')):
-                if i == 3:
-                    break
-                else:
-                    plankton_tmp.append(
-                        {
-                            'skuNo': row.get('skuNo'),
-                            'fullname': row.get('fullname')
-                        }
-                    )
+            if data_plankton:
+                for i, row in enumerate(data_plankton.get('data')):
+                    if i == 3:
+                        break
+                    else:
+                        plankton_tmp.append(
+                            {
+                                'skuNo': row.get('skuNo'),
+                                'fullname': row.get('fullname')
+                            }
+                        )
 
             for i, data in enumerate(serializer_area):
                 if i == 11:
                     break
                 else:
                     data['plankton'] = plankton_tmp
+
+            response = {
+                'success': True,
+                'code': Config.STATUS_CODES[Config.SUCCESS],
+                'message': Config.SUCCESS.lower(),
+                'meta': {
+                    'page': request_objects.page,
+                    'limit': request_objects.limit,
+                    'totalRecords': total,
+                    'totalPages': total_page,
+                },
+                'data': serializer_area
+            }
+
+            return ro.ResponseSuccess(response)
+
+        except asyncio.TimeoutError:
+            return CommonResponse.build_common_message("time out error", Config.SYSTEM_ERROR)
+
+        except asyncio.CancelledError:
+            return CommonResponse.build_common_message("cancelled error", Config.SYSTEM_ERROR)
+
+        except Exception as e:
+            return CommonResponse.build_common_message(str(e), Config.SYSTEM_ERROR)
+
+
+class ListAllOnlyAreaUsecase(uc.UseCaseAsync):
+
+    def __init__(self, repo):
+        self.repo = repo
+
+    async def process_request(self, request_objects):
+        try:
+            task1 = asyncio.create_task(self.repo.get_all_area(request_objects), name='data_area')
+            task2 = asyncio.create_task(self.repo.get_total_area(request_objects), name='total_area')
+            all_tasks = [task1, task2]
+            done_tasks, pending_tasks = await asyncio.wait(all_tasks, timeout=50, return_when=asyncio.ALL_COMPLETED)
+
+            init_pass = True
+            count = 0
+            while init_pass or len(pending_tasks) > 0:
+                init_pass = False
+                if count == 3:
+                    return CommonResponse.build_common_message("pending tasks", Config.SYSTEM_ERROR)
+
+                for done in done_tasks:
+                    name = done.get_name()
+                    if name == 'data_area':
+                        data = done.result()
+                    elif name == 'total_area':
+                        total = done.result()
+
+                done_tasks, pending_tasks = await asyncio.wait(all_tasks, timeout=50, return_when=asyncio.ALL_COMPLETED)
+                count += 1
+
+            total_page = ceil(total / request_objects.limit)
+
+            serializer_area = AllAreaBaseSchema().dump(data, many=True)
 
             response = {
                 'success': True,

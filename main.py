@@ -34,11 +34,12 @@ def setup_schemas(app, loop):
 
 def setup_aiohttp():
     @app.listener('before_server_start')
-    async def init(app, loop):
-        app.aiohttp_session = aiohttp.ClientSession(loop=loop)
+    async def init_async(app, loop):
+        timeout = aiohttp.ClientTimeout(total=50, connect=50) # timeout dalam satuan menit
+        app.aiohttp_session = aiohttp.ClientSession(loop=loop, timeout=timeout)
 
     @app.listener('after_server_stop')
-    async def finish(app, loop):
+    async def finish_async(app, loop):
         loop.run_until_complete(app.aiohttp_session.close())
         loop.close()
 

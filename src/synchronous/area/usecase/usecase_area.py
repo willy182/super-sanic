@@ -65,3 +65,39 @@ class ListAllAreaUsecase(uc.UseCaseSync):
 
         except Exception as e:
             return CommonResponse.build_common_message(str(e), Config.SYSTEM_ERROR)
+
+
+class ListAllOnlyAreaUsecase(uc.UseCaseSync):
+
+    def __init__(self, repo):
+        self.repo = repo
+
+    def process_request(self, request_objects):
+        try:
+            data = self.repo.area.get_all_area(request_objects)
+            total = self.repo.area.get_total_area(request_objects)
+
+            total_page = ceil(total / request_objects.limit)
+
+            serializer_area = AllAreaBaseSchema().dump(data, many=True)
+
+            response = {
+                'success': True,
+                'code': Config.STATUS_CODES[Config.SUCCESS],
+                'message': Config.SUCCESS.lower(),
+                'meta': {
+                    'page': request_objects.page,
+                    'limit': request_objects.limit,
+                    'totalRecords': total,
+                    'totalPages': total_page,
+                },
+                'data': serializer_area
+            }
+
+            return ro.ResponseSuccess(response)
+
+        except requests.Timeout:
+            return CommonResponse.build_common_message("time out error", Config.SYSTEM_ERROR)
+
+        except Exception as e:
+            return CommonResponse.build_common_message(str(e), Config.SYSTEM_ERROR)

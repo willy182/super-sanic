@@ -22,9 +22,7 @@ class PlanktonV4RepositoryAsync(PlanktonRepository):
 
         url = '{}/v4{}'.format(self.__url, uri)
 
-        # timeout = aiohttp.ClientTimeout(total=50) # timeout dalam satuan menit
-        async with self.__session as session:
-            response = await fetch_aio(session, url, plankton_header, self.__tracer)
+        response = await fetch_aio(self.__session, url, plankton_header, self.__tracer)
 
         return response
 
