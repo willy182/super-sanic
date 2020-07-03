@@ -69,7 +69,7 @@ class ExpeditionsRepositoryPSQL(ExpeditionsRepository):
 
         query = expeditions.select().where(expeditions.c.id == id)
 
-        with self._tracer.start_span('start_get_total_expedition') as span:
+        with self._tracer.start_span('start_get_by_id') as span:
             try:
                 data = await self.db().fetch_one(query)
 
